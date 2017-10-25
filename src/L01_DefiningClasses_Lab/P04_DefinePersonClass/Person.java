@@ -1,4 +1,4 @@
-package L01_DefiningClassesLab.P04_DefinePersonClass;
+package L01_DefiningClasses_Lab.P04_DefinePersonClass;
 
 import java.util.ArrayList;
 import java.util.List;

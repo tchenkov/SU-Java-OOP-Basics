@@ -1,4 +1,4 @@
-package L01_DefiningClassesLab.P02_GettersAndSetters;
+package L01_DefiningClasses_Lab.P02_GettersAndSetters;
 
 public class Main {
     public static void main(String[] args) {

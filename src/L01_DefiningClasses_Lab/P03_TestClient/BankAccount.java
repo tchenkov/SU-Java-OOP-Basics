@@ -1,8 +1,12 @@
-package L01_DefiningClassesLab.P02_GettersAndSetters;
+package L01_DefiningClasses_Lab.P03_TestClient;
 
 public class BankAccount {
     private int id;
     private double balance;
+    
+    public BankAccount(int id) {
+        this.id = id;
+    }
     
     public void setId(int id) {
         this.id = id;
@@ -22,6 +26,17 @@ public class BankAccount {
         if (0 <= amount && amount <= this.balance) {
             this.balance -= amount;
         }
+        else {
+            System.out.println("Insufficient balance");
+        }
+    }
+    
+    public static void printDoesNotExist() {
+        System.out.println("Account does not exist");
+    }
+    
+    public static void printAlreadyExist() {
+        System.out.println("Account already exists");
     }
     
     @Override

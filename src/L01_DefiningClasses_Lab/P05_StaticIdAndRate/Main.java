@@ -1,4 +1,4 @@
-package L01_DefiningClassesLab.P05_StaticIdAndRate;
+package L01_DefiningClasses_Lab.P05_StaticIdAndRate;
 
 import java.io.BufferedReader;
 import java.io.IOException;

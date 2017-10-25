@@ -1,4 +1,4 @@
-package L01_DefiningClassesLab.P03_TestClient;
+package L01_DefiningClasses_Lab.P04_DefinePersonClass;
 
 public class BankAccount {
     private int id;
