@@ -3,156 +3,129 @@ package L02_DefiningClasses_Exercises.P10_FamilyTree;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-public class Main {
+@SuppressWarnings("Duplicates")
+public class Main { // todo: needs more work
+    private static List<Person> peopleList = new ArrayList<>();
+    
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         
-        Map<Integer, Person> people = new HashMap<>();
-        getNewPerson(br.readLine(), people);
+        Person thePerson = getNewPerson(br.readLine());
         
-        getPeople(people, br);
+        getPeople(br);
         
-        printPersonTies(people.get(1), people);
+        printPersonTies(thePerson);
     }
     
-    private static void printPersonTies(Person person, Map<Integer, Person> people) {
-        printPerson(person);
+    private static void printPersonTies(Person person) {
+        System.out.println(person);
         System.out.println("Parents:");
-        person.getParentsIds().stream()
-                .forEach(id -> printPerson(people.get(id)));
+        person.getParents().forEach(System.out::println);
         System.out.println("Children:");
-        person.getChildrenIds().stream()
-                .forEach(id -> printPerson(people.get(id)));
+        person.getChildren().forEach(System.out::println);
     }
     
-    private static void printPerson(Person person) {
-        System.out.println(String.format("%s %s %s",
-                        person.getFirstName(), person.getLastName(), person.getBirthday() ));
-    }
-    
-    private static void getPeople(Map<Integer, Person> people, BufferedReader br) throws IOException {
+    private static void getPeople(BufferedReader br) throws IOException {
         String line = br.readLine();
         while (!line.equals("End")) {
             String[] familyInfo = line.split(" - ");
             if (familyInfo.length == 2) {
-                Person parent = getNewPerson(familyInfo[0], people);
-                Person child = getNewPerson(familyInfo[1], people);
+                Person parent = getNewPerson(familyInfo[0]);
+                Person child = getNewPerson(familyInfo[1]);
                 
-                if (!people.get(parent.getPersonId()).getChildrenIds().contains(child.getPersonId())) {
-                    people.get(parent.getPersonId()).getChildrenIds().add(child.getPersonId());
-                }
-    
-                if (!people.get(child.getPersonId()).getParentsIds().contains(parent.getPersonId())) {
-                    people.get(child.getPersonId()).getParentsIds().add(parent.getPersonId());
-                }
+                parent.addChild(child);
+                child.addParent(parent);
             }
             else {
-                completePerson(line, people);
+                completePerson(line);
             }
             
             line = br.readLine();
         }
     }
     
-    private static void completePerson(String line, Map<Integer, Person> people) {
+    private static void completePerson(String line) {
         String[] personInfo = line.split(" ");
         String firstName = personInfo[0];
         String lastName = personInfo[1];
         String birthday = personInfo[2];
         
         boolean isFound = false;
-        int firstHalfIndex = -1;
-        for (Map.Entry<Integer, Person> person : people.entrySet()) {
-            int secondHalfIndex = person.getKey();
-            if (person.getValue().getBirthday().equals(birthday)) {
-                if (!isFound) {
-                    people.get(person.getKey()).setFirstName(firstName);
-                    people.get(person.getKey()).setLastName(lastName);
-                    firstHalfIndex = person.getKey();
-                    isFound = true;
-                    continue;
-                }
-                else {
-                    trimAndFixTies(firstHalfIndex, secondHalfIndex, people);
-                    return;
-                }
-            }
+        Person completePerson = null;
+        for (Person person : peopleList) {
+            boolean isMatch = (person.getBirthday().equals(birthday)) ||
+                    (person.getFirstName().equals(firstName) && person.getLastName().equals(lastName));
             
-            if (person.getValue().getFirstName().equals(firstName) &&
-                    person.getValue().getLastName().equals(lastName)) {
+            if (isMatch) {
                 if (!isFound) {
-                    people.get(person.getKey()).setBirthday(birthday);
-                    firstHalfIndex = person.getKey();
+                    
+                    completePerson = person.completeAPerson(firstName, lastName, birthday);
                     isFound = true;
                     continue;
                 }
                 else {
-                    trimAndFixTies(firstHalfIndex, secondHalfIndex, people);
+                    trimAndFixTies(completePerson, person);
                     return;
                 }
             }
         }
     }
     
-    private static void trimAndFixTies(int firstHalfIndex, int secondHalfIndex, Map<Integer, Person> people) {
-        Person completePerson = people.get(firstHalfIndex);
-        Person incompletePerson = people.get(secondHalfIndex);
-        
-        for (Integer parentId : incompletePerson.getParentsIds()) {
-            if (!completePerson.getParentsIds().contains(parentId)) {
-                completePerson.getParentsIds().add(parentId);
-            }
+    private static void trimAndFixTies(Person completePerson, Person incompletePerson) {
+        for (Person parent : incompletePerson.getParents()) {
+            completePerson.addParent(parent);
         }
         
-        for (Integer childId : incompletePerson.getChildrenIds()) {
-            if (!completePerson.getChildrenIds().contains(childId)) {
-                completePerson.getChildrenIds().add(childId);
+        for (Person child : incompletePerson.getChildren()) {
+            completePerson.addChild(child);
+        }
+        
+        for (Person child : completePerson.getParents()) {
+            if (child.getParents().contains(incompletePerson)){
+                child.getParents().set(child.getParents().indexOf(incompletePerson), completePerson);
             }
         }
-    
-        for (Map.Entry<Integer, Person> person : people.entrySet()) {
-            if (person.getValue().getParentsIds().contains(secondHalfIndex)){
-                int index = people.get(person.getKey()).getParentsIds().indexOf(secondHalfIndex);
-                people.get(person.getKey()).getParentsIds().set(index, firstHalfIndex);
-            }
-            
-            if (person.getValue().getChildrenIds().contains(secondHalfIndex)){
-                int index = people.get(person.getKey()).getChildrenIds().indexOf(secondHalfIndex);
-                people.get(person.getKey()).getChildrenIds().set(index, firstHalfIndex);
+        
+        for (Person person : peopleList) {
+            if (person.getChildren().contains(incompletePerson) && !person.getChildren().contains(completePerson)){
+                int index = person.getChildren().indexOf(incompletePerson);
+                person.getChildren().set(index, completePerson);
             }
         }
-    
-        people.put(firstHalfIndex, completePerson);
-        people.remove(secondHalfIndex);
+        
+        peopleList.remove(incompletePerson);
     }
     
-    private static Person getNewPerson(String input, Map<Integer, Person> people) {
+    private static Person getNewPerson(String input) {
         if (input.contains("/")) {
-            for (Person person : people.values()) {
+            for (Person person : peopleList) {
                 if (person.getBirthday().equals(input)){
-                    return people.get(person.getPersonId());
+                    return person;
                 }
             }
             
             Person person = new Person(input);
-            people.putIfAbsent(person.getPersonId(), person);
+            peopleList.add(person);
             return person;
         }
         String firstName = input.split(" ")[0];
         String lastName = input.split(" ")[1];
-    
-        for (Person person : people.values()) {
+        
+        for (Person person : peopleList) {
             if (person.getFirstName().equals(firstName) &&
                     person.getLastName().equals(lastName)){
-                return people.get(person.getPersonId());
+                return person;
             }
         }
         
         Person person = new Person(firstName, lastName);
-        people.putIfAbsent(person.getPersonId(), person);
+        peopleList.add(person);
         
         return person;
     }

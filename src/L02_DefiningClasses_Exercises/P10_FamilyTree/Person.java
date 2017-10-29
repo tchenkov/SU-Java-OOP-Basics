@@ -1,7 +1,8 @@
 package L02_DefiningClasses_Exercises.P10_FamilyTree;
 
+import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.stream.Collectors;
 
 public class Person {
     private static int personCount = 0;
@@ -9,14 +10,14 @@ public class Person {
     private String firstName;
     private String lastName;
     private String birthday;
-    private List<Integer> parentsIds;
-    private List<Integer> childrenIds;
+    private LinkedList<Person> parents;
+    private LinkedList<Person> children;
     
     
     public Person() {
         this.personId = ++personCount;
-        this.parentsIds = new LinkedList<>();
-        this.childrenIds = new LinkedList<>();
+        this.parents = new LinkedList<>();
+        this.children = new LinkedList<>();
     }
     
     public Person(String firstName, String lastName) {
@@ -68,11 +69,38 @@ public class Person {
         this.birthday = birthday;
     }
     
-    public List<Integer> getParentsIds() {
-        return parentsIds;
+    public void addChild(Person child){
+        if (!this.children.contains(child)){
+            this.children.add(child);
+        }
     }
     
-    public List<Integer> getChildrenIds() {
-        return childrenIds;
+    public void addParent(Person parent){
+        if (!this.parents.contains(parent)){
+            this.parents.add(parent);
+        }
+    }
+    
+    public LinkedList<Person> getParents() {
+        return parents;
+    }
+    
+    public LinkedList<Person> getChildren() {
+        return children;
+    }
+    
+    public Person completeAPerson(String firstName, String lastName, String birthday) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.birthday = birthday;
+        
+        return this;
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("%s %s %s",
+                this.getFirstName(), this.getLastName(), this.getBirthday()
+        );
     }
 }
